@@ -1,0 +1,38 @@
+<h1>An application requests access to your data!</h1>
+<form action="{{ .Action }}" method="POST">
+  <input type="hidden" name="challenge" value="{{ .Challenge }}" />
+  {{- if .Client.LogoURI }}
+  <image src="{{ .Client.LogoURI }}" />
+  {{- end }}
+  <p>
+    Hi {{ .User }}, application <strong>{{ or .Client.ClientName .ClientClientID }}</strong> wants access resources on your behalf and to:
+  </p>
+  {{- range $scope := .RequestedScope}}
+  <input type="checkbox" class="grant_scope" id="{{ $scope }}" name="grant_scope" value="{{ $scope }}" />
+  <label for="{{ $scope }}">{{ $scope }}</label>
+  <br/>
+  {{- end }}
+  <p>
+    Do you want to be asked next time when this application wants to access your data? The application will not be able to ask for more permissions without your consent.
+  </p>
+  <ul>
+    {{- if .Client.PolicyURI }}
+    <li>
+      <a href="{{ .Client.PolicyURI }}"></a>
+    </li>
+    {{- end }}
+    {{- if .Client.TosURI }}
+    <li>
+      <a href="{{ .Client.TosURI }}"></a>
+    </li>
+    {{- end }}
+  </ul>
+  <p>
+    <input type="checkbox" id="remember" name="remember" value="1" />
+    <label for="remember">Do not ask me again</label>
+  </p>
+  <p>
+    <input type="submit" id="accept" name="submit" value="Allow access">
+    <input type="submit" id="reject" name="submit" value="Deny access">
+  </p>
+</form>

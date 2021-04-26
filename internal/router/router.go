@@ -11,9 +11,17 @@ var log = logger.GetLogger()
 func CreateRouter() *gin.Engine {
 	r := gin.New()
 	r.UseRawPath = true // prevent path from being automatically decoded
+
+	r.LoadHTMLGlob("templates/*")
+
 	r.Use(middleware.Logger(log), gin.Recovery())
 
 	r.GET("/healthcheck", healthcheck)
+	r.GET("/login", loginPage)
+	r.POST("/login", doLogin)
+
+	r.GET("/consent", consentPage)
+	r.POST("/consent", doConsent)
 
 	return r
 }
