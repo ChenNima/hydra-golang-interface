@@ -9,6 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/ory/hydra-client-go/client/admin"
 	"github.com/ory/hydra-client-go/models"
+	"github.com/ory/kratos-client-go/client/public"
+	kratosModels "github.com/ory/kratos-client-go/models"
 )
 
 func loginPage(c *gin.Context) {
@@ -44,10 +46,29 @@ func doLogin(c *gin.Context) {
 	password := c.Request.FormValue("password")
 	remember := c.Request.FormValue("remember") == "1"
 
-	if email != "felix.chen@sap.com" && password != "123" {
+	kratosPublic := util.GetKratosPublic()
+
+	loginFlow, err := kratosPublic.Public.InitializeSelfServiceLoginViaAPIFlow(&public.InitializeSelfServiceLoginViaAPIFlowParams{
+		Context: context.Background(),
+	})
+	if err != nil {
+		logger.GetLogger().Error(err)
+	}
+	flow := loginFlow.GetPayload().ID
+
+	_, err = kratosPublic.Public.CompleteSelfServiceLoginFlowWithPasswordMethod(&public.CompleteSelfServiceLoginFlowWithPasswordMethodParams{
+		Context: context.Background(),
+		Flow:    string(*flow),
+		Body: &kratosModels.CompleteSelfServiceLoginFlowWithPasswordMethod{
+			Password:   password,
+			Identifier: email,
+		},
+	})
+
+	if err != nil {
 		c.HTML(http.StatusOK, "login.html", gin.H{
 			"Challenge": loginChallenge,
-			"Error":     "The username / password combination is not correct",
+			"Error":     err.Error(),
 			"Remember":  remember,
 		})
 		return

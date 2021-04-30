@@ -3,7 +3,7 @@
   {{ .Error }}
 <p>
 {{- end }}
-<form action="/login" method="POST">
+<form action="/register" method="POST">
   <input type="hidden" name="challenge" value="{{ .Challenge }}" />
   <input type="email" id="email" name="email" placeholder="felix@foobar.com" />
   <input type="password" id="password" name="password" />
@@ -11,6 +11,5 @@
   <input type="checkbox" id="remember" name="remember" value="1" />
   <label for="remember">Remember me</label>
 
-  <input type="submit" id="accept" name="submit" value="Log in" />
+  <input type="submit" id="accept" name="submit" value="register" />
 </form>
-<a href="/register?login_challenge={{ .Challenge }}">Register Now</a>>

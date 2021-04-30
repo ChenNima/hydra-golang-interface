@@ -23,5 +23,8 @@ func CreateRouter() *gin.Engine {
 	r.GET("/consent", consentPage)
 	r.POST("/consent", doConsent)
 
+	r.GET("/register", registerPage)
+	r.POST("/register", doRegister)
+
 	return r
 }
