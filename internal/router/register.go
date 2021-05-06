@@ -2,11 +2,8 @@ package router
 
 import (
 	"context"
-	"errors"
 	"net/http"
 	"net/url"
-	"strconv"
-	"strings"
 
 	"felix.chen/login/internal/logger"
 	"felix.chen/login/internal/util"
@@ -25,6 +22,8 @@ func registerPage(c *gin.Context) {
 	})
 	if err != nil {
 		logger.GetLogger().Error(err)
+		c.String(http.StatusBadRequest, err.Error())
+		return
 	}
 	body := *(loginRequest.Payload)
 	if *body.Skip {
@@ -46,29 +45,6 @@ func registerPage(c *gin.Context) {
 type Identity struct {
 	Email    string `json:"email,omitempty"`
 	Password string `json:"password,omitempty"`
-}
-
-func register(values url.Values, flow string) error {
-	kratosUrlString := util.GetKratosPublicUrl().String() + "/self-service/registration"
-	kratosUrl, _ := url.Parse(kratosUrlString)
-	q := kratosUrl.Query()
-	q.Set("flow", flow)
-	kratosUrl.RawQuery = q.Encode()
-	client := &http.Client{}
-	req, err := http.NewRequest("POST", kratosUrl.String(), strings.NewReader(values.Encode()))
-	if err != nil {
-		return err
-	}
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	req.Header.Add("Content-Length", strconv.Itoa(len(values.Encode())))
-	res, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	if res.StatusCode > 399 {
-		return errors.New("Register failed!")
-	}
-	return nil
 }
 
 func doRegister(c *gin.Context) {
@@ -103,7 +79,7 @@ func doRegister(c *gin.Context) {
 	registerData.Add("traits.email", email)
 	registerData.Add("password", password)
 	registerData.Add("method", "password")
-	err = register(registerData, flow)
+	err = util.KratosSelfService("registration", registerData, flow)
 	if err != nil {
 		c.HTML(http.StatusOK, "register.html", gin.H{
 			"Challenge": loginChallenge,

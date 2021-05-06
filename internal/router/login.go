@@ -3,6 +3,7 @@ package router
 import (
 	"context"
 	"net/http"
+	"net/url"
 
 	"felix.chen/login/internal/logger"
 	"felix.chen/login/internal/util"
@@ -10,7 +11,6 @@ import (
 	"github.com/ory/hydra-client-go/client/admin"
 	"github.com/ory/hydra-client-go/models"
 	"github.com/ory/kratos-client-go/client/public"
-	kratosModels "github.com/ory/kratos-client-go/models"
 )
 
 func loginPage(c *gin.Context) {
@@ -56,14 +56,19 @@ func doLogin(c *gin.Context) {
 	}
 	flow := loginFlow.GetPayload().ID
 
-	_, err = kratosPublic.Public.CompleteSelfServiceLoginFlowWithPasswordMethod(&public.CompleteSelfServiceLoginFlowWithPasswordMethodParams{
-		Context: context.Background(),
-		Flow:    string(*flow),
-		Body: &kratosModels.CompleteSelfServiceLoginFlowWithPasswordMethod{
-			Password:   password,
-			Identifier: email,
-		},
-	})
+	// _, err = kratosPublic.Public.CompleteSelfServiceLoginFlowWithPasswordMethod(&public.CompleteSelfServiceLoginFlowWithPasswordMethodParams{
+	// 	Context: context.Background(),
+	// 	Flow:    string(*flow),
+	// 	Body: &kratosModels.CompleteSelfServiceLoginFlowWithPasswordMethod{
+	// 		Password:   password,
+	// 		Identifier: email,
+	// 	},
+	// })
+	loginData := url.Values{}
+	loginData.Add("password_identifier", email)
+	loginData.Add("password", password)
+	loginData.Add("method", "password")
+	err = util.KratosSelfService("login", loginData, string(*flow))
 
 	if err != nil {
 		c.HTML(http.StatusOK, "login.html", gin.H{

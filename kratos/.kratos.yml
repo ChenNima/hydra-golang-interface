@@ -31,10 +31,10 @@ selfservice:
         default_browser_return_url: http://127.0.0.1:3000/auth/login
 
     login:
-      ui_url: http://127.0.0.1:3000/auth/login
+      ui_url: http://127.0.0.1:8083/login
 
     registration:
-      ui_url: http://127.0.0.1:3000/auth/registration
+      ui_url: http://127.0.0.1:8083/register
       after:
         password:
           hooks:
